@@ -52,39 +52,41 @@ class CalculationsController < ApplicationController
 
   def descriptive_statistics
     @numbers = params[:list_of_numbers].gsub(',','').split.map(&:to_f)
-    #numbers_int = @numbers.map {|x| x.to_i}
+    numbers_sorted = params[:list_of_numbers].gsub(',','').split.map(&:to_f).sort!
 
-    @sorted_numbers = @numbers.sort!
+    @sorted_numbers = numbers_sorted
 
-    @count = @numbers.length
+    @count = numbers_sorted.length
 
-    @minimum = @numbers.min
+    @minimum = numbers_sorted.min
 
-    @maximum = @numbers.max
+    @maximum = numbers_sorted.max
 
-    @range = @numbers.max - @numbers.min
+    @range = numbers_sorted.max - numbers_sorted.min
 
-    if @numbers.length.odd?
-      @median = @numbers[(@numbers.length/2).to_i]
+    if numbers_sorted.length.odd?
+      @median = numbers_sorted[(numbers_sorted.length/2).to_i]
     else
-      @median = (@numbers[@numbers.length]+@numbers[@numbers.length+1])/2
+      @median = (numbers_sorted[numbers_sorted.length/2-1].to_f + numbers_sorted[numbers_sorted.length/2].to_f)/2
     end
 
-    @sum = @numbers.sum
+    @sum = numbers_sorted.sum
 
-    @mean = @numbers.sum/@numbers.length
+    @mean = numbers_sorted.sum/numbers_sorted.length
 
     local_variance = 0
 
-    @numbers.each do |i|
+    numbers_sorted.each do |i|
       local_variance=local_variance + (i-@mean)**2.0
     end
-    local_variance = local_variance/@numbers.length
+    local_variance = local_variance/numbers_sorted.length
     @variance = local_variance
 
     @standard_deviation = local_variance**0.5
 
-    @mode = "Replace this string with your answer."
+    freq = numbers_sorted.inject(Hash.new(0)) {|h,v| h[v]+=1; h}
+
+    @mode = numbers_sorted.max_by {|v| freq[v]}
 
     # ================================================================================
     # Your code goes above.
