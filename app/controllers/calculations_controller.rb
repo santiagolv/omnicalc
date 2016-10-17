@@ -4,27 +4,22 @@ class CalculationsController < ApplicationController
     @text = params[:user_text]
     @special_word = params[:user_word]
 
-    # ================================================================================
-    # Your code goes below.
-    # The text the user input is in the string @text.
-    # The special word the user input is in the string @special_word.
-    # ================================================================================
-    text_splitted = @text.split
+    text_splitted = @text.gsub("\n"," ").squish.upcase.split
     text_splitted_length = text_splitted.length
     counter = 0
     special_word_occurrences = 0
     while counter < text_splitted_length do
-      if text_splitted[counter]==@special_word || text_splitted[counter]==@special_word+";"|| text_splitted[counter]==@special_word+":"|| text_splitted[counter]==@special_word+"!"|| text_splitted[counter]==@special_word+"?"|| text_splitted[counter]==@special_word+"."|| text_splitted[counter]==@special_word+","
+      if text_splitted[counter]==@special_word.upcase || text_splitted[counter]==@special_word.upcase+";"|| text_splitted[counter]==@special_word.upcase+":"|| text_splitted[counter]==@special_word.upcase+"!"|| text_splitted[counter]==@special_word.upcase+"?"|| text_splitted[counter]==@special_word.upcase+"."|| text_splitted[counter]==@special_word.upcase+","
         counter += 1
         special_word_occurrences += 1
-          else
+      else
         counter += 1
       end
     end
     text_chomped = @text.gsub("\n"," ")
 
-    @character_count_with_spaces = @text.chomp.length
-    @character_count_without_spaces = text_chomped.squish.gsub(" ","").length
+    @character_count_with_spaces = text_chomped.length
+    @character_count_without_spaces = text_chomped.gsub(/\s+/,"").length
     @word_count = @text.squish.count(" ")+1
     @occurrences = special_word_occurrences
 
@@ -36,18 +31,7 @@ class CalculationsController < ApplicationController
     @years = params[:number_of_years].to_i
     @principal = params[:principal_value].to_f
 
-    # ================================================================================
-    # Your code goes below.
-    # The annual percentage rate the user input is in the decimal @apr.
-    # The number of years the user input is in the integer @years.
-    # The principal value the user input is in the decimal @principal.
-    # ================================================================================
-
     @monthly_payment = (@apr/100.0/12)*@principal / (1-(1+@apr/100.0/12)**(@years*-1.0*12))
-
-    # ================================================================================
-    # Your code goes above.
-    # ================================================================================
 
     render("loan_payment.html.erb")
   end
@@ -56,56 +40,49 @@ class CalculationsController < ApplicationController
     @starting = Chronic.parse(params[:starting_time])
     @ending = Chronic.parse(params[:ending_time])
 
-    # ================================================================================
-    # Your code goes below.
-    # The start time is in the Time @starting.
-    # The end time is in the Time @ending.
-    # Note: Ruby stores Times in terms of seconds since Jan 1, 1970.
-    #   So if you subtract one time from another, you will get an integer
-    #   number of seconds as a result.
-    # ================================================================================
-
-    @seconds = "Replace this string with your answer."
-    @minutes = "Replace this string with your answer."
-    @hours = "Replace this string with your answer."
-    @days = "Replace this string with your answer."
-    @weeks = "Replace this string with your answer."
-    @years = "Replace this string with your answer."
-
-    # ================================================================================
-    # Your code goes above.
-    # ================================================================================
+    @seconds = @ending-@starting
+    @minutes = (@ending-@starting)/60
+    @hours = (@ending-@starting)/60/60
+    @days = (@ending-@starting)/60/60/24
+    @weeks = (@ending-@starting)/60/60/24/7
+    @years = (@ending-@starting)/60/60/24/365.25
 
     render("time_between.html.erb")
   end
 
   def descriptive_statistics
-    @numbers = params[:list_of_numbers].gsub(',', '').split.map(&:to_f)
+    @numbers = params[:list_of_numbers].gsub(',','').split.map(&:to_f)
+    #numbers_int = @numbers.map {|x| x.to_i}
 
-    # ================================================================================
-    # Your code goes below.
-    # The numbers the user input are in the array @numbers.
-    # ================================================================================
+    @sorted_numbers = @numbers.sort!
 
-    @sorted_numbers = "Replace this string with your answer."
+    @count = @numbers.length
 
-    @count = "Replace this string with your answer."
+    @minimum = @numbers.min
 
-    @minimum = "Replace this string with your answer."
+    @maximum = @numbers.max
 
-    @maximum = "Replace this string with your answer."
+    @range = @numbers.max - @numbers.min
 
-    @range = "Replace this string with your answer."
+    if @numbers.length.odd?
+      @median = @numbers[(@numbers.length/2).to_i]
+    else
+      @median = (@numbers[@numbers.length]+@numbers[@numbers.length+1])/2
+    end
 
-    @median = "Replace this string with your answer."
+    @sum = @numbers.sum
 
-    @sum = "Replace this string with your answer."
+    @mean = @numbers.sum/@numbers.length
 
-    @mean = "Replace this string with your answer."
+    local_variance = 0
 
-    @variance = "Replace this string with your answer."
+    @numbers.each do |i|
+      local_variance=local_variance + (i-@mean)**2.0
+    end
+    local_variance = local_variance/@numbers.length
+    @variance = local_variance
 
-    @standard_deviation = "Replace this string with your answer."
+    @standard_deviation = local_variance**0.5
 
     @mode = "Replace this string with your answer."
 
